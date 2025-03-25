@@ -1,0 +1,56 @@
+.data
+msg: .asciz "Esse Programa suporta strings de até 999 bytes (não nulos)"
+valorFinal: .space 1000
+.text 
+	.globl _start
+_start:
+	 la a0, msg # chama 
+	 jal funcao
+	 # printar resultado
+	 mv a1, a0  # argumento da write (retorno da funcao)
+	 li a0, 1           # stdout
+	 li a2, 1000        # quantos bytes escrever    
+	 li a7, 64          # sycall write  
+	 ecall                
+	 j exit
+funcao:
+	 addi sp, sp, -4
+	 sw s0, 0(sp) # como vou usar s0, empilho ele antes 
+	 li t0, 0     # acumulador da soma
+	 mv s0, a0
+ 	 lb t1, 0(s0) # primeiro byte da string
+	while:
+	 	beq t1, zero, converte # se encontrou o zero da string, sai do loop
+	 	addi s0, s0, 1 	       # offset para o proximo byte 
+	 	addi t0, t0, 1         # adiciona um na soma 
+	 	lb t1, 0(s0)           # proximo byte 
+	 	j while
+	 	
+	converte:
+		li t4, 10	   # 10 que será para dividir
+		la t5, valorFinal  # string onde iremos escrever
+		addi t5, t5, 3 	   # vai para o final da string
+		sb zero, 0(t5)     # adiciona terminador nulo
+	whileConverte:
+	 	beq  t0, zero, retorno   # se quociente zero, para a divisão
+		div  t1, t0, t4       # quociente da divisão
+		rem  t2, t0, t4       # resto da divisão
+		addi t2, t2, 48       # transfere para correspondente em ascii 
+		addi  t5, t5, -1      # adiciona novo offset, voltando pra frente da palavra sempre
+		sb t2, 0(t5)	      # guarda na posição livre
+		add t0, zero, t1      # quociente passa a ser o novo numero a ser divido 
+		j whileConverte	
+		
+	retorno:
+		la a0, valorFinal # valor de retorno
+		# desempilha 	
+		lw s0, 0(sp)    # como vou usar s0, empilho ele antes 	
+		addi sp, sp, 4  # separo espaço para um registrador
+		jr ra 		# retorno
+	
+		
+                                                             
+exit:
+	li a7, 93
+	li a0, 0
+	ecall
