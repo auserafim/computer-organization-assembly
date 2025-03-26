@@ -1,6 +1,9 @@
 .data 
-msg: .asciz "Digite Algo:\n"
+msg: .asciz "Digite Algo: (resultado pode ser vizualizado na variavel s1 ao final do programa)\n"
 buffer: .word 0, 0, 0, 0
+
+
+# resultado pode ser vizualizado na variavel s1 ao final do programa
 .text
 	.globl _start
 _start:
@@ -8,29 +11,18 @@ _start:
 	li a7, 64 
 	li a0, 1
 	la a1, msg
-	li a2, 13
+	li a2, 100
 	ecall
  	# Lê do teclado 
  	li a7, 63     # read
  	li a0, 0      # descritor de arquivo
  	la a1, buffer # endereço do buffer
- 	li a2, 11   # máximo de bytes para ler 
+ 	li a2, 13   # máximo de bytes para ler 
  	ecall 
  	
- 	#li a7, 64 # write
-	#li a0, 1
-	#la a1, buffer
-	#li a2, 13
-	#ecall
-	
+ 	# chamando funcao converte 
 	la a0, buffer # argumento para a função 
 	jal converte 
-	la a0, buffer
-	lb t1, 0(a0) # se primeiro byte for negativo, adiciona
-	li t0, 45
-	li t2, -1
-	bne t1, t0, exit
-	mul s0, s0, t2
 	j exit
 	
 converte:
@@ -86,6 +78,9 @@ funcao_potencia:
 	jr ra
 	
 exit:
+	#mv a0, s1
+	#li a7, 1 # printar inteiro 
+	#ecall   
 	li a7, 93
 	li a0, 0
 	ecall	
